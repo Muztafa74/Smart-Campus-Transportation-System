@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
+import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
+import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
+import { PageHeader } from '../../components/ui/PageHeader';
 
 export function AdminCars() {
   const [cars, setCars] = useState([]);
@@ -63,11 +65,8 @@ export function AdminCars() {
 
   return (
     <div className="page wide">
-      <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / Cars
-      </p>
-      <h1>Cars</h1>
-      {error ? <div className="alert error">{error}</div> : null}
+      <PageHeader title="Cars" />
+      <InlineAlert message={error} />
 
       <form className="form admin-form" onSubmit={handleCreate}>
         <h2 className="form-section-title">Add vehicle</h2>
@@ -95,9 +94,9 @@ export function AdminCars() {
         </div>
       </form>
 
-      {loading ? <p className="muted">Loading…</p> : null}
+      {loading ? <LoadingState /> : null}
       <div className="table-wrap">
-        <table className="table">
+        <table className="table" aria-label="Cars table">
           <thead>
             <tr>
               <th>Plate</th>
@@ -110,11 +109,11 @@ export function AdminCars() {
           <tbody>
             {cars.map((c) => (
               <tr key={c._id}>
-                <td>{c.plateNumber}</td>
-                <td>{c.model || '—'}</td>
-                <td>{c.seats}</td>
-                <td>{c.isAvailable ? 'Yes' : 'No'}</td>
-                <td>
+                <td data-label="Plate">{c.plateNumber}</td>
+                <td data-label="Model">{c.model || '—'}</td>
+                <td data-label="Seats">{c.seats}</td>
+                <td data-label="Available">{c.isAvailable ? 'Yes' : 'No'}</td>
+                <td data-label="Actions">
                   <button type="button" className="btn ghost small-btn" onClick={() => toggleAvailable(c)}>
                     Toggle available
                   </button>{' '}
@@ -124,6 +123,7 @@ export function AdminCars() {
                 </td>
               </tr>
             ))}
+            {!loading && cars.length === 0 ? <EmptyTableRow colSpan={5} message="No cars found." /> : null}
           </tbody>
         </table>
       </div>

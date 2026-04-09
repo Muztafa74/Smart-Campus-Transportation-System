@@ -9,6 +9,7 @@ import { AdminPaths } from './pages/admin/AdminPaths';
 import { AdminTrips } from './pages/admin/AdminTrips';
 import { AdminUsers } from './pages/admin/AdminUsers';
 import { Dashboard } from './pages/Dashboard';
+import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { MyTrips } from './pages/MyTrips';
 import { Register } from './pages/Register';
@@ -20,11 +21,12 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/request-trip" element={<RequestTrip />} />
               <Route path="/my-trips" element={<MyTrips />} />
               <Route element={<AdminRoute />}>

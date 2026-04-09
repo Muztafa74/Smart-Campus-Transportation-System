@@ -46,12 +46,16 @@ async function run() {
   }
 
   const gates = [
-    { name: 'Main Gate', description: 'North entrance' },
-    { name: 'Library Gate', description: 'Near library' },
+    { name: 'Main Gate', key: 'MAIN', description: 'North entrance' },
+    { name: 'Library Gate', key: 'LIB', description: 'Near library' },
   ];
   for (const g of gates) {
     const exists = await Gate.findOne({ name: g.name });
     if (!exists) await Gate.create(g);
+    else if (!exists.key) {
+      exists.key = g.key;
+      await exists.save();
+    }
   }
   console.log('Gates ensured:', gates.map((g) => g.name).join(', '));
 

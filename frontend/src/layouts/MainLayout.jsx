@@ -1,49 +1,129 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 export function MainLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   function handleLogout() {
     logout();
     navigate('/login', { replace: true });
   }
 
+  function closeMenu() {
+    setMenuOpen(false);
+  }
+
   return (
     <div className="app-shell">
-      <header className="top-nav">
-        <Link to="/" className="brand">
-          Smart Campus Transport
+      {menuOpen ? <button type="button" className="menu-backdrop" aria-label="Close menu" onClick={closeMenu} /> : null}
+      <aside className={`app-sidebar ${menuOpen ? 'is-open' : ''}`} aria-label="Sidebar navigation">
+        <Link to="/dashboard" className="brand">
+          <span className="brand-mark" aria-hidden>
+            HU
+          </span>
+          <span>
+            Guidy – HorusGo
+            <span className="brand-sub">Horus University - Egypt</span>
+          </span>
         </Link>
-        <nav className="nav-links">
-          <Link to="/">Dashboard</Link>
+
+        <nav className="side-nav" aria-label="Primary">
+          <p className="nav-group-title">General</p>
+          <NavLink to="/dashboard" onClick={closeMenu}>
+            <span aria-hidden>⌂</span> Dashboard
+          </NavLink>
+          <NavLink to="/request-trip" onClick={closeMenu}>
+            <span aria-hidden>⊕</span> Request trip
+          </NavLink>
+          <NavLink to="/my-trips" onClick={closeMenu}>
+            <span aria-hidden>▣</span> My trips
+          </NavLink>
+
           {user?.role === 'ADMIN' ? (
             <>
-              <span className="nav-sep" aria-hidden />
-              <Link to="/admin/users">Users</Link>
-              <Link to="/admin/trips">All trips</Link>
-              <Link to="/admin/cars">Cars</Link>
-              <Link to="/admin/gates">Gates</Link>
-              <Link to="/admin/paths">Routes</Link>
+              <p className="nav-group-title">Administration</p>
+              <NavLink to="/admin/users" onClick={closeMenu}>
+                <span aria-hidden>◌</span> Users
+              </NavLink>
+              <NavLink to="/admin/trips" onClick={closeMenu}>
+                <span aria-hidden>▤</span> All trips
+              </NavLink>
+              <NavLink to="/admin/cars" onClick={closeMenu}>
+                <span aria-hidden>◈</span> Cars
+              </NavLink>
+              <NavLink to="/admin/gates" onClick={closeMenu}>
+                <span aria-hidden>◇</span> Gates
+              </NavLink>
+              <NavLink to="/admin/paths" onClick={closeMenu}>
+                <span aria-hidden>⋯</span> Routes
+              </NavLink>
             </>
           ) : null}
-          <span className="nav-sep" aria-hidden />
-          <Link to="/request-trip">Request trip</Link>
-          <Link to="/my-trips">My trips</Link>
         </nav>
-        <div className="nav-user">
+
+        <div className="sidebar-user">
           <span className="muted small">
-            {user?.fullName} · {user?.role}
+            Signed in as <strong>{user?.fullName}</strong>
           </span>
+          <span className="pill role-pill">{user?.role}</span>
           <button type="button" className="btn ghost" onClick={handleLogout}>
             Log out
           </button>
         </div>
-      </header>
-      <main className="main-content">
-        <Outlet />
-      </main>
+      </aside>
+
+      <div className="app-main">
+        <header className="top-nav">
+          <button
+            type="button"
+            className="menu-toggle btn ghost"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-expanded={menuOpen}
+            aria-label="Toggle navigation"
+          >
+            Menu
+          </button>
+          <div>
+            <p className="top-label">Guidy – HorusGo</p>
+            <p className="top-subtitle muted">Manage rides, fleets, and routes with a premium themed console.</p>
+          </div>
+          <div className="nav-user">
+            <span className="muted small">
+              {user?.fullName} · {user?.role}
+            </span>
+          </div>
+        </header>
+        <main className="main-content">
+          <Outlet />
+        </main>
+        <nav className="mobile-bottom-nav" aria-label="Mobile quick navigation">
+          <NavLink to="/dashboard" onClick={closeMenu}>
+            <span aria-hidden>⌂</span>
+            <span>Home</span>
+          </NavLink>
+          <NavLink to="/request-trip" onClick={closeMenu}>
+            <span aria-hidden>⊕</span>
+            <span>Request</span>
+          </NavLink>
+          <NavLink to="/my-trips" onClick={closeMenu}>
+            <span aria-hidden>▣</span>
+            <span>Trips</span>
+          </NavLink>
+          <button
+            type="button"
+            className="mobile-nav-menu-btn"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-expanded={menuOpen}
+            aria-label="Open navigation menu"
+          >
+            <span aria-hidden>☰</span>
+            <span>Menu</span>
+          </button>
+        </nav>
+      </div>
     </div>
   );
 }

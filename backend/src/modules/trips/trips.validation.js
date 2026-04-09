@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 
 const requestTripRules = [
   body('fromGateId').isMongoId().withMessage('Valid fromGateId (start) is required'),
@@ -7,6 +7,7 @@ const requestTripRules = [
 ];
 
 const tripIdParam = [param('id').isMongoId().withMessage('Valid trip id is required')];
+const tripIdParamV2 = [param('tripId').isMongoId().withMessage('Valid trip id is required')];
 
 const updateStatusRules = [
   ...tripIdParam,
@@ -15,4 +16,9 @@ const updateStatusRules = [
     .withMessage('status must be IN_PROGRESS or COMPLETED'),
 ];
 
-module.exports = { requestTripRules, updateStatusRules };
+const completeFromQueryRules = [
+  ...tripIdParamV2,
+  query('new_status').equals('COMPLETED').withMessage('new_status must be COMPLETED'),
+];
+
+module.exports = { requestTripRules, updateStatusRules, completeFromQueryRules };

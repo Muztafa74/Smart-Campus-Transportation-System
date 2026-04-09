@@ -25,3 +25,17 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const status = err.response?.status;
+    const url = String(err.config?.url || '');
+    const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register');
+    if (status === 401 && !isAuthRoute && getStoredToken()) {
+      setStoredToken(null);
+      window.location.assign('/login');
+    }
+    return Promise.reject(err);
+  }
+);

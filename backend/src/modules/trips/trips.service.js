@@ -24,6 +24,7 @@ async function assignPendingTrips() {
     const car = await Car.findOne({ isAvailable: true }).sort({ createdAt: 1 });
     if (!car) break;
     trip.car = car._id;
+    trip.carId = car.plateNumber;
     trip.status = 'ASSIGNED';
     car.isAvailable = false;
     await Promise.all([trip.save(), car.save()]);
@@ -43,13 +44,6 @@ async function createTripRequest(userId, { fromGateId, toGateId, carId }) {
     throw err;
   }
   const route = await GatePath.findOne({ fromGate: fromGateId, toGate: toGateId });
-  if (!route) {
-    const err = new Error(
-      'No route digit is defined for this start and destination. An admin must add it under Routes (gate → gate).'
-    );
-    err.status = 400;
-    throw err;
-  }
 
   const car = await Car.findOneAndUpdate({ _id: carId, isAvailable: true }, { isAvailable: false }, { new: true });
   if (!car) {
@@ -70,7 +64,10 @@ async function createTripRequest(userId, { fromGateId, toGateId, carId }) {
       user: userId,
       fromGate: fromGateId,
       toGate: toGateId,
-      digit: route.digit,
+      carId: car.plateNumber,
+      startKey: fromGate.key || null,
+      destinationKey: toGate.key || null,
+      digit: route?.digit ?? null,
       car: carId,
       status: 'ASSIGNED',
     });
@@ -78,11 +75,13 @@ async function createTripRequest(userId, { fromGateId, toGateId, carId }) {
     const userLabel = who ? `${who.fullName} <${who.email}>` : String(userId);
     // Shown in the backend terminal (where you run npm run dev / npm start)
     console.log(
-      '\n[BOOKING] ROUTE DIGIT: %s | trip=%s | %s → %s | vehicle=%s | user=%s\n',
-      route.digit,
+      '\n[BOOKING] ROUTE DIGIT: %s | trip=%s | from=%s (%s) -> to=%s (%s) | vehicle=%s | user=%s\n',
+      route?.digit ?? 'N/A',
       String(trip._id),
       fromGate.name,
+      fromGate.key || '-',
       toGate.name,
+      toGate.key || '-',
       car.plateNumber,
       userLabel
     );
@@ -147,10 +146,46 @@ async function updateTripStatus(tripId, nextStatus) {
     .populate('user', '-password');
 }
 
+async function completeTripById(tripId) {
+  const trip = await Trip.findById(tripId);
+  if (!trip) {
+    const err = new Error('Trip not found');
+    err.status = 404;
+    throw err;
+  }
+
+  if (trip.status === 'COMPLETED') {
+    return { alreadyCompleted: true, trip: await Trip.findById(trip._id).populate('fromGate').populate('toGate').populate('car') };
+  }
+
+  trip.status = 'COMPLETED';
+
+  let car = null;
+  if (trip.carId) {
+    car = await Car.findOne({ plateNumber: trip.carId });
+  }
+  if (!car && trip.car) {
+    car = await Car.findById(trip.car);
+  }
+
+  if (car) {
+    car.isAvailable = true;
+    await car.save();
+    console.log(`Car ${car.plateNumber} is now AVAILABLE`);
+  }
+
+  await trip.save();
+  console.log(`Trip ${tripId} marked as COMPLETED`);
+
+  const updatedTrip = await Trip.findById(trip._id).populate('fromGate').populate('toGate').populate('car').populate('user', '-password');
+  return { alreadyCompleted: false, trip: updatedTrip };
+}
+
 module.exports = {
   assignPendingTrips,
   createTripRequest,
   listMyTrips,
   listAllTrips,
   updateTripStatus,
+  completeTripById,
 };

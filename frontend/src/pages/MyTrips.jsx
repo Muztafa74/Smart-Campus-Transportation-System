@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../api/client';
+import { EmptyState, InlineAlert, LoadingState } from '../components/ui/Feedback';
+import { PageHeader } from '../components/ui/PageHeader';
 
 function formatGate(g) {
   if (!g) return '—';
@@ -10,6 +11,11 @@ function formatGate(g) {
 function formatCar(c) {
   if (!c) return '—';
   return c.plateNumber || c._id;
+}
+
+function formatRequestedAt(value) {
+  if (!value) return '—';
+  return new Date(value).toLocaleString();
 }
 
 export function MyTrips() {
@@ -36,43 +42,39 @@ export function MyTrips() {
 
   return (
     <div className="page">
-      <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / My trips
-      </p>
-      <h1>My trips</h1>
-      {loading ? <p className="muted">Loading…</p> : null}
-      {error ? <div className="alert error">{error}</div> : null}
-      {!loading && trips.length === 0 ? <p className="muted">No trips yet.</p> : null}
+      <PageHeader title="My trips" />
+      {loading ? <LoadingState /> : null}
+      <InlineAlert message={error} />
+      {!loading && !error && trips.length === 0 ? (
+        <EmptyState title="No trips yet." description="Your requested rides will appear here once you create one." />
+      ) : null}
       {trips.length > 0 ? (
-        <div className="table-wrap">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Start</th>
-                <th>Destination</th>
-                <th>Digit</th>
-                <th>Vehicle</th>
-                <th>Requested</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trips.map((t) => (
-                <tr key={t.id}>
-                  <td>
-                    <span className={`pill status-${(t.status || '').toLowerCase()}`}>{t.status}</span>
-                  </td>
-                  <td>{formatGate(t.fromGate)}</td>
-                  <td>{formatGate(t.toGate)}</td>
-                  <td>{t.digit != null ? t.digit : '—'}</td>
-                  <td>{formatCar(t.car)}</td>
-                  <td className="muted small">
-                    {t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="trip-list" aria-label="My trips list">
+          {trips.map((t) => (
+            <article key={t.id} className="trip-card">
+              <header className="trip-card-head">
+                <p className="trip-route">
+                  {formatGate(t.fromGate)} <span aria-hidden>→</span> {formatGate(t.toGate)}
+                </p>
+                <span className={`pill status-${(t.status || '').toLowerCase()}`}>{t.status || 'UNKNOWN'}</span>
+              </header>
+
+              <div className="trip-meta-grid">
+                <div className="trip-meta-item">
+                  <span className="trip-meta-label">Vehicle</span>
+                  <p>{formatCar(t.car)}</p>
+                </div>
+                <div className="trip-meta-item">
+                  <span className="trip-meta-label">Digit</span>
+                  <p>{t.digit != null ? t.digit : '—'}</p>
+                </div>
+                <div className="trip-meta-item trip-meta-wide">
+                  <span className="trip-meta-label">Requested</span>
+                  <p className="muted small">{formatRequestedAt(t.createdAt)}</p>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       ) : null}
     </div>

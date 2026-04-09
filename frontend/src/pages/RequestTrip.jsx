@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
+import { InlineAlert, LoadingState } from '../components/ui/Feedback';
+import { PageHeader } from '../components/ui/PageHeader';
 
 function carLabel(c) {
   if (!c) return '';
@@ -9,6 +12,7 @@ function carLabel(c) {
 }
 
 export function RequestTrip() {
+  const { user } = useAuth();
   const [gates, setGates] = useState([]);
   const [cars, setCars] = useState([]);
   const [fromGateId, setFromGateId] = useState('');
@@ -20,8 +24,13 @@ export function RequestTrip() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
+      setLoading(true);
       setError('');
       try {
         const [gatesRes, carsRes] = await Promise.all([api.get('/gates'), api.get('/cars/available')]);
@@ -43,7 +52,7 @@ export function RequestTrip() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -78,37 +87,34 @@ export function RequestTrip() {
     }
   }
 
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   const canSubmit = gates.length >= 2 && cars.length >= 1 && Boolean(carId);
 
   return (
     <div className="page narrow">
-      <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / Request trip
-      </p>
-      <h1>Request trip</h1>
-      <p className="muted">
-        Choose start, destination, and an available vehicle. A <strong>route digit</strong> must exist for your gate pair
-        under <strong>Routes</strong>.
-      </p>
-      {loading ? <p className="muted">Loading gates and vehicles…</p> : null}
+      <PageHeader title="Request trip" description="Choose start, destination, and an available vehicle." />
+      {loading ? <LoadingState message="Loading gates and vehicles…" /> : null}
       {!loading && gates.length === 0 ? (
-        <div className="alert error">
+        <div className="alert error" role="alert">
           No gates configured yet. An admin must add gates before you can request a trip.
         </div>
       ) : null}
       {!loading && gates.length === 1 ? (
-        <div className="alert error">
+        <div className="alert error" role="alert">
           At least two gates are required (start and destination). Ask an admin to add another gate.
         </div>
       ) : null}
       {!loading && gates.length >= 2 && cars.length === 0 ? (
-        <div className="alert error">
+        <div className="alert error" role="alert">
           No vehicles are available right now. Try again later or ask an admin to free or add a car.
         </div>
       ) : null}
       <form className="form" onSubmit={handleSubmit}>
-        {error ? <div className="alert error">{error}</div> : null}
-        {success ? <div className="alert success">{success}</div> : null}
+        <InlineAlert message={error} />
+        <InlineAlert message={success} type="success" />
         <label className="field">
           <span>Start (pickup)</span>
           <select value={fromGateId} onChange={(e) => setFromGateId(e.target.value)} required disabled={gates.length < 2}>

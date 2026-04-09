@@ -8,9 +8,18 @@ const r = Router();
 
 const idParam = [param('id').isMongoId().withMessage('Valid gate id is required')];
 
-const createRules = [body('name').trim().notEmpty().withMessage('name is required'), body('description').optional().trim()];
+const createRules = [
+  body('name').trim().notEmpty().withMessage('name is required'),
+  body('key').trim().notEmpty().withMessage('key is required').isLength({ min: 2, max: 20 }),
+  body('description').optional().trim(),
+];
 
-const updateRules = [...idParam, body('name').optional().trim().notEmpty(), body('description').optional().trim()];
+const updateRules = [
+  ...idParam,
+  body('name').optional().trim().notEmpty(),
+  body('key').optional().trim().notEmpty().isLength({ min: 2, max: 20 }),
+  body('description').optional().trim(),
+];
 
 r.get('/', authMiddleware, gatesController.listPublic);
 

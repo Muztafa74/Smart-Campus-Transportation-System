@@ -53,6 +53,7 @@ When logged in as **ADMIN**, the home dashboard shows management shortcuts. The 
 | Users | GET | `/api/users/me` | JWT required |
 | Users | GET/PATCH/DELETE | `/api/users`, `/api/users/:id` | **ADMIN** |
 | Cars | GET | `/api/cars/available` | Authenticated — vehicles with `isAvailable: true` (for booking UI) |
+| Car Client | GET | `/api/car/:carId/next-trip` | For Python car client. Returns oldest assigned trip for that car: `{ trip_id, source, destination }` (`source`/`destination` are numeric gate keys) |
 | Trips | POST | `/api/trips/request` | Body: `fromGateId`, `toGateId`, **`carId`** (must be available). Requires a **Routes** record for the pair (**digit** stored). Trip is created as **ASSIGNED** with that vehicle. Other **PENDING** trips still get auto-assigned cars when one frees up |
 | Trips | GET | `/api/trips/my` | Current user’s trips |
 | Trips | GET | `/api/trips` | **ADMIN** – all trips |

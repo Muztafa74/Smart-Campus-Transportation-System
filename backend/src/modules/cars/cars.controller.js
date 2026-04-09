@@ -1,4 +1,5 @@
 const Car = require('../../model/car.model');
+const carsService = require('./cars.service');
 
 async function list(req, res, next) {
   try {
@@ -72,4 +73,20 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { list, listAvailable, create, update, remove };
+async function nextTrip(req, res, next) {
+  try {
+    const { carId } = req.params;
+    const result = await carsService.getNextAssignedTripForCar(carId);
+    if (!result) {
+      return res.json(null);
+    }
+    return res.json(result);
+  } catch (e) {
+    if (e.code === 'GATE_KEYS_NOT_NUMERIC') {
+      return res.status(400).json({ error: 'Gate keys must be numeric' });
+    }
+    next(e);
+  }
+}
+
+module.exports = { list, listAvailable, create, update, remove, nextTrip };

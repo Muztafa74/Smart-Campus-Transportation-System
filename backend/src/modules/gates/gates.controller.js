@@ -11,13 +11,13 @@ async function listPublic(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const { name, description } = req.body;
-    const gate = await Gate.create({ name, description: description ?? '' });
+    const { name, key, description } = req.body;
+    const gate = await Gate.create({ name, key, description: description ?? '' });
     res.status(201).json({ gate });
   } catch (e) {
     if (e.code === 11000) {
       e.status = 409;
-      e.message = 'Gate name already exists';
+      e.message = 'Gate name or key already exists';
     }
     next(e);
   }
@@ -25,19 +25,20 @@ async function create(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { name, description } = req.body;
+    const { name, key, description } = req.body;
     const gate = await Gate.findById(req.params.id);
     if (!gate) {
       return res.status(404).json({ message: 'Gate not found' });
     }
     if (name !== undefined) gate.name = name;
+    if (key !== undefined) gate.key = key;
     if (description !== undefined) gate.description = description;
     await gate.save();
     res.json({ gate });
   } catch (e) {
     if (e.code === 11000) {
       e.status = 409;
-      e.message = 'Gate name already exists';
+      e.message = 'Gate name or key already exists';
     }
     next(e);
   }

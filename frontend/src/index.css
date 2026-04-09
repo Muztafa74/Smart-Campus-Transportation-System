@@ -2,13 +2,22 @@
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light;
-  --bg: #f4f6fb;
-  --surface: #ffffff;
-  --text: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --accent: #2563eb;
+  color-scheme: dark;
+  --bg: #090a0d;
+  --surface: #101319;
+  --surface-soft: #161b24;
+  --surface-raise: #1a202b;
+  --text: #eee6d3;
+  --muted: #c5b89a;
+  --border: #2a313f;
+  --accent: #c9a227;
+  --accent-2: #1ca6a6;
+  --accent-soft: rgba(201, 162, 39, 0.18);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 14px 34px rgba(0, 0, 0, 0.45);
 }
 
 *,
@@ -20,8 +29,12 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--bg);
+  background:
+    linear-gradient(165deg, rgba(28, 166, 166, 0.08), transparent 35%),
+    linear-gradient(25deg, rgba(201, 162, 39, 0.08), transparent 40%),
+    var(--bg);
   color: var(--text);
+  overflow-x: hidden;
 }
 
 #root {
@@ -30,4 +43,15 @@ body {
 
 a {
   color: var(--accent);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+*:focus-visible {
+  outline: 3px solid rgba(201, 162, 39, 0.45);
+  outline-offset: 2px;
 }

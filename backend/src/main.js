@@ -6,6 +6,7 @@ const authRoutes = require('./modules/auth/auth.routes');
 const usersRoutes = require('./modules/users/users.routes');
 const tripsRoutes = require('./modules/trips/trips.routes');
 const carsRoutes = require('./modules/cars/cars.routes');
+const carClientRoutes = require('./modules/cars/car-client.routes');
 const gatesRoutes = require('./modules/gates/gates.routes');
 const pathsRoutes = require('./modules/paths/paths.routes');
 const { setupSwagger } = require('./swagger/swagger.setup');
@@ -24,6 +25,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/trips', tripsRoutes);
 app.use('/api/cars', carsRoutes);
+app.use('/api/car', carClientRoutes);
 app.use('/api/gates', gatesRoutes);
 app.use('/api/paths', pathsRoutes);
 

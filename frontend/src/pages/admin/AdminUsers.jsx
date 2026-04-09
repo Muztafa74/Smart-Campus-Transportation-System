@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
+import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
+import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
+import { PageHeader } from '../../components/ui/PageHeader';
 
 const ROLES = ['FACULTY', 'DISABLED', 'ADMIN'];
 
@@ -48,14 +50,11 @@ export function AdminUsers() {
 
   return (
     <div className="page wide">
-      <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / Users
-      </p>
-      <h1>Users</h1>
-      {loading ? <p className="muted">Loading…</p> : null}
-      {error ? <div className="alert error">{error}</div> : null}
+      <PageHeader title="Users" />
+      {loading ? <LoadingState /> : null}
+      <InlineAlert message={error} />
       <div className="table-wrap">
-        <table className="table">
+        <table className="table" aria-label="Users table">
           <thead>
             <tr>
               <th>Name</th>
@@ -67,9 +66,9 @@ export function AdminUsers() {
           <tbody>
             {users.map((u) => (
               <tr key={u.id}>
-                <td>{u.fullName}</td>
-                <td>{u.email}</td>
-                <td>
+                <td data-label="Name">{u.fullName}</td>
+                <td data-label="Email">{u.email}</td>
+                <td data-label="Role">
                   <select
                     className="select-inline"
                     value={u.role}
@@ -82,13 +81,14 @@ export function AdminUsers() {
                     ))}
                   </select>
                 </td>
-                <td>
+                <td data-label="Actions">
                   <button type="button" className="btn ghost small-btn" onClick={() => removeUser(u.id)}>
                     Delete
                   </button>
                 </td>
               </tr>
             ))}
+            {!loading && users.length === 0 ? <EmptyTableRow colSpan={4} message="No users found." /> : null}
           </tbody>
         </table>
       </div>

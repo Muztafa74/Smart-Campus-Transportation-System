@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
+import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
+import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
+import { PageHeader } from '../../components/ui/PageHeader';
 
 function gateLabel(g) {
   if (!g) return '—';
@@ -78,15 +80,12 @@ export function AdminPaths() {
 
   return (
     <div className="page wide">
-      <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / Routes (gate → gate)
-      </p>
-      <h1>Gate routes</h1>
+      <PageHeader title="Gate routes" />
       <p className="muted">
         Each row is a directed path (e.g. gate A → gate B). The <strong>digit</strong> is the number you define for that
         route (distance code, minutes, internal id, etc.).
       </p>
-      {error ? <div className="alert error">{error}</div> : null}
+      <InlineAlert message={error} />
 
       <form className="form admin-form" onSubmit={handleCreate}>
         <h2 className="form-section-title">New path</h2>
@@ -132,9 +131,9 @@ export function AdminPaths() {
         ) : null}
       </form>
 
-      {loading ? <p className="muted">Loading…</p> : null}
+      {loading ? <LoadingState /> : null}
       <div className="table-wrap">
-        <table className="table">
+        <table className="table" aria-label="Gate routes table">
           <thead>
             <tr>
               <th>From</th>
@@ -146,9 +145,9 @@ export function AdminPaths() {
           <tbody>
             {paths.map((p) => (
               <tr key={p.id}>
-                <td>{gateLabel(p.fromGate)}</td>
-                <td>{gateLabel(p.toGate)}</td>
-                <td>
+                <td data-label="From">{gateLabel(p.fromGate)}</td>
+                <td data-label="To">{gateLabel(p.toGate)}</td>
+                <td data-label="Digit">
                   <input
                     type="number"
                     min={0}
@@ -160,13 +159,14 @@ export function AdminPaths() {
                     }}
                   />
                 </td>
-                <td>
+                <td data-label="Actions">
                   <button type="button" className="btn ghost small-btn" onClick={() => removePath(p.id)}>
                     Delete
                   </button>
                 </td>
               </tr>
             ))}
+            {!loading && paths.length === 0 ? <EmptyTableRow colSpan={4} message="No routes found." /> : null}
           </tbody>
         </table>
       </div>

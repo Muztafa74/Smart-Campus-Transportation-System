@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
+import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
+import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
+import { PageHeader } from '../../components/ui/PageHeader';
 
 function gateName(g) {
   if (!g) return '—';
-  return g.name || g._id;
+  const name = g.name || '';
+  const key = g.key || '';
+  if (name && key) return `${name} (${key})`;
+  return name || key || g._id;
 }
 
 function carPlate(c) {
@@ -60,14 +65,11 @@ export function AdminTrips() {
 
   return (
     <div className="page wide">
-      <p className="breadcrumb">
-        <Link to="/">Dashboard</Link> / All trips
-      </p>
-      <h1>All trips</h1>
-      {loading ? <p className="muted">Loading…</p> : null}
-      {error ? <div className="alert error">{error}</div> : null}
+      <PageHeader title="All trips" />
+      {loading ? <LoadingState /> : null}
+      <InlineAlert message={error} />
       <div className="table-wrap">
-        <table className="table">
+        <table className="table" aria-label="All trips table">
           <thead>
             <tr>
               <th>Status</th>
@@ -85,16 +87,16 @@ export function AdminTrips() {
               const actions = nextActions(t.status);
               return (
                 <tr key={t.id}>
-                  <td>
+                  <td data-label="Status">
                     <span className={`pill status-${(t.status || '').toLowerCase()}`}>{t.status}</span>
                   </td>
-                  <td className="small">{userLabel(t.user)}</td>
-                  <td>{gateName(t.fromGate)}</td>
-                  <td>{gateName(t.toGate)}</td>
-                  <td>{t.digit != null ? t.digit : '—'}</td>
-                  <td>{carPlate(t.car)}</td>
-                  <td className="muted small">{t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}</td>
-                  <td>
+                  <td data-label="User" className="small">{userLabel(t.user)}</td>
+                  <td data-label="Start">{gateName(t.fromGate)}</td>
+                  <td data-label="Destination">{gateName(t.toGate)}</td>
+                  <td data-label="Digit">{t.digit != null ? t.digit : '—'}</td>
+                  <td data-label="Vehicle">{carPlate(t.car)}</td>
+                  <td data-label="Requested" className="muted small">{t.createdAt ? new Date(t.createdAt).toLocaleString() : '—'}</td>
+                  <td data-label="Actions">
                     {actions.map((a) => (
                       <button
                         key={a.value}
@@ -111,6 +113,7 @@ export function AdminTrips() {
                 </tr>
               );
             })}
+            {!loading && trips.length === 0 ? <EmptyTableRow colSpan={8} message="No trips found." /> : null}
           </tbody>
         </table>
       </div>
