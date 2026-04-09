@@ -4,9 +4,18 @@ const swaggerUi = require('swagger-ui-express');
 
 /**
  * @param {import('express').Express} app
- * @param {number} port
+ * @param {import('../../config/env.service')} env
  */
-function setupSwagger(app, port) {
+function setupSwagger(app, env) {
+  const servers = [];
+  if (env.apiPublicUrl) {
+    servers.push({ url: env.apiPublicUrl, description: 'Deployed' });
+  }
+  servers.push({
+    url: `http://127.0.0.1:${env.port}`,
+    description: 'Local development',
+  });
+
   const options = {
     definition: {
       openapi: '3.0.3',
@@ -16,7 +25,7 @@ function setupSwagger(app, port) {
         description:
           'REST API for campus transport. Use **Authorize** and paste `Bearer <your_jwt>` or only the token depending on UI version.',
       },
-      servers: [{ url: `http://localhost:${port}`, description: 'Local' }],
+      servers,
     },
     apis: [path.join(__dirname, 'openapi.docs.js')],
   };

@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+/**
+ * Production User (auth, roles, bcrypt password).
+ * For a minimal schema sample see `exampleUser.model.js`.
+ */
 const ROLES = ['FACULTY', 'DISABLED', 'ADMIN'];
 
 const userSchema = new mongoose.Schema(

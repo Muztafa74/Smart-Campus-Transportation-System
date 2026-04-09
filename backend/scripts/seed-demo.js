@@ -4,20 +4,14 @@
  */
 require('dotenv').config({ path: require('path').join(__dirname, '../config/.env') });
 const bcrypt = require('bcryptjs');
-const mongoose = require('mongoose');
+const { connectDatabase, disconnectDatabase } = require('../config/db');
 const User = require('../src/model/user.model');
 const Gate = require('../src/model/gate.model');
 const Car = require('../src/model/car.model');
 const GatePath = require('../src/model/path.model');
 
-const uri = process.env.MONGO_URI;
-if (!uri) {
-  console.error('MONGO_URI missing in config/.env');
-  process.exit(1);
-}
-
 async function run() {
-  await mongoose.connect(uri);
+  await connectDatabase();
   const email = (process.env.SEED_ADMIN_EMAIL || 'admin@campus.local').toLowerCase().trim();
   const password = process.env.SEED_ADMIN_PASSWORD || 'admin12345';
   const resetPwd = ['1', 'true', 'yes'].includes(
@@ -79,7 +73,7 @@ async function run() {
     }
   }
 
-  await mongoose.disconnect();
+  await disconnectDatabase();
 }
 
 run().catch((e) => {

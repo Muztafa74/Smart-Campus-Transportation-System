@@ -1,9 +1,5 @@
-const mongoose = require('mongoose');
-const env = require('../../config/env.service');
-
-async function connectDatabase() {
-  mongoose.set('strictQuery', true);
-  await mongoose.connect(env.mongoUri);
-}
-
-module.exports = { connectDatabase };
+/**
+ * Back-compat re-export — use `config/db.js` in new code.
+ * @module database/connection
+ */
+module.exports = require('../../config/db');
