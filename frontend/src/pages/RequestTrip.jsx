@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { getApiErrorMessage } from '../api/errors';
 import { useAuth } from '../contexts/AuthContext';
@@ -116,6 +116,11 @@ export function RequestTrip() {
       <form className="form" onSubmit={handleSubmit}>
         <InlineAlert message={error} />
         <InlineAlert message={success} type="success" />
+        {success ? (
+          <p className="muted small">
+            <Link to="/my-trips">Open My trips</Link> to watch status update to completed — no refresh needed.
+          </p>
+        ) : null}
         <label className="field">
           <span>Start (pickup)</span>
           <select value={fromGateId} onChange={(e) => setFromGateId(e.target.value)} required disabled={gates.length < 2}>

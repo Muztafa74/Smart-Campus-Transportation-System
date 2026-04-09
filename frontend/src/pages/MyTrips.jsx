@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { getApiErrorMessage } from '../api/errors';
 import { EmptyState, InlineAlert, LoadingState } from '../components/ui/Feedback';
 import { PageHeader } from '../components/ui/PageHeader';
+
+const POLL_MS = 5000;
 
 function formatGate(g) {
   if (!g) return '—';
@@ -19,33 +21,63 @@ function formatRequestedAt(value) {
   return new Date(value).toLocaleString();
 }
 
+function hasNonTerminalTrip(list) {
+  return list.some((t) => t.status && t.status !== 'COMPLETED');
+}
+
 export function MyTrips() {
   const [trips, setTrips] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const tripsRef = useRef(trips);
+  tripsRef.current = trips;
+
+  const loadTrips = useCallback(async ({ silent = false } = {}) => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+    try {
+      const { data } = await api.get('/trips/my');
+      setTrips(data.trips || []);
+      setError('');
+    } catch (err) {
+      if (!silent) setError(getApiErrorMessage(err, 'Could not load your trips.'));
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data } = await api.get('/trips/my');
-        if (!cancelled) setTrips(data.trips || []);
-      } catch (err) {
-        if (!cancelled) setError(getApiErrorMessage(err, 'Could not load your trips.'));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
+    loadTrips({ silent: false });
+  }, [loadTrips]);
+
+  useEffect(() => {
+    const tick = () => {
+      if (document.visibilityState === 'hidden') return;
+      if (!hasNonTerminalTrip(tripsRef.current)) return;
+      loadTrips({ silent: true });
     };
-  }, []);
+    const id = setInterval(tick, POLL_MS);
+    const onVisible = () => {
+      if (!document.hidden) tick();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [loadTrips]);
+
+  const liveUpdating = !loading && hasNonTerminalTrip(trips);
 
   return (
     <div className="page">
       <PageHeader title="My trips" />
       {loading ? <LoadingState /> : null}
       <InlineAlert message={error} />
+      {liveUpdating ? (
+        <p className="muted small trip-live-hint" role="status">
+          Trip status updates automatically — no need to refresh.
+        </p>
+      ) : null}
       {!loading && !error && trips.length === 0 ? (
         <EmptyState title="No trips yet." description="Your requested rides will appear here once you create one." />
       ) : null}
