@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { getApiErrorMessage } from '../api/errors';
 import { useAuth } from '../contexts/AuthContext';
 
 function isHorusUniversityEmail(email) {
@@ -40,12 +41,7 @@ export function Register() {
       });
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      const msg =
-        err.response?.data?.errors?.[0]?.message ||
-        err.response?.data?.message ||
-        err.message ||
-        'Registration failed';
-      setError(msg);
+      setError(getApiErrorMessage(err, 'Registration failed. Please try again.'));
     } finally {
       setBusy(false);
     }

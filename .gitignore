@@ -3,5 +3,8 @@ dist/
 *.log
 .DS_Store
 
-# Secrets (use config/.env.example as a template)
+# Secrets and local env (use *.env.example templates)
 backend/config/.env
+frontend/.env
+frontend/.env.local
+.env.local

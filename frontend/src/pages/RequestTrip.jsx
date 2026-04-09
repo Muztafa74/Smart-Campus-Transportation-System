@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { getApiErrorMessage } from '../api/errors';
 import { useAuth } from '../contexts/AuthContext';
 import { InlineAlert, LoadingState } from '../components/ui/Feedback';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -44,7 +45,7 @@ export function RequestTrip() {
         else if (g[0]?._id) setToGateId(g[0]._id);
         if (c[0]?._id) setCarId(c[0]._id);
       } catch (err) {
-        if (!cancelled) setError(err.response?.data?.message || 'Could not load gates or vehicles');
+        if (!cancelled) setError(getApiErrorMessage(err, 'Could not load gates or vehicles.'));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -81,7 +82,7 @@ export function RequestTrip() {
       setCars(next);
       setCarId(next[0]?._id || '');
     } catch (err) {
-      setError(err.response?.data?.message || 'Request failed');
+      setError(getApiErrorMessage(err, 'Could not book the trip.'));
     } finally {
       setBusy(false);
     }

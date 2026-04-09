@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { getApiErrorMessage } from '../api/errors';
 import { useAuth } from '../contexts/AuthContext';
 
 export function Login() {
@@ -19,11 +20,10 @@ export function Login() {
     setError('');
     setBusy(true);
     try {
-      await     login(email, password);
+      await login(email, password);
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      const msg = err.response?.data?.message || err.message || 'Login failed';
-      setError(msg);
+      setError(getApiErrorMessage(err, 'Sign in failed. Check your email and password.'));
     } finally {
       setBusy(false);
     }

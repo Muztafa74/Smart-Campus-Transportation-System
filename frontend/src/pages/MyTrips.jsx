@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
+import { getApiErrorMessage } from '../api/errors';
 import { EmptyState, InlineAlert, LoadingState } from '../components/ui/Feedback';
 import { PageHeader } from '../components/ui/PageHeader';
 
@@ -30,7 +31,7 @@ export function MyTrips() {
         const { data } = await api.get('/trips/my');
         if (!cancelled) setTrips(data.trips || []);
       } catch (err) {
-        if (!cancelled) setError(err.response?.data?.message || 'Could not load trips');
+        if (!cancelled) setError(getApiErrorMessage(err, 'Could not load your trips.'));
       } finally {
         if (!cancelled) setLoading(false);
       }

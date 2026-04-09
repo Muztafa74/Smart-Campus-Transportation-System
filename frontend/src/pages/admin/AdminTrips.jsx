@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/client';
+import { getApiErrorMessage } from '../../api/errors';
 import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
 import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -40,7 +41,7 @@ export function AdminTrips() {
       const { data } = await api.get('/trips');
       setTrips(data.trips || []);
     } catch (e) {
-      setError(e.response?.data?.message || 'Failed to load trips');
+      setError(getApiErrorMessage(e, 'Failed to load trips.'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +58,7 @@ export function AdminTrips() {
       await api.patch(`/trips/${tripId}/status`, { status });
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Update failed');
+      setError(getApiErrorMessage(e, 'Update failed.'));
     } finally {
       setBusyId(null);
     }

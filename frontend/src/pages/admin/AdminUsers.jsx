@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/client';
+import { getApiErrorMessage } from '../../api/errors';
 import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
 import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -17,7 +18,7 @@ export function AdminUsers() {
       const { data } = await api.get('/users');
       setUsers(data.users || []);
     } catch (e) {
-      setError(e.response?.data?.message || 'Failed to load users');
+      setError(getApiErrorMessage(e, 'Failed to load users.'));
     } finally {
       setLoading(false);
     }
@@ -33,7 +34,7 @@ export function AdminUsers() {
       await api.patch(`/users/${userId}`, { role });
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Update failed');
+      setError(getApiErrorMessage(e, 'Update failed.'));
     }
   }
 
@@ -44,7 +45,7 @@ export function AdminUsers() {
       await api.delete(`/users/${userId}`);
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Delete failed');
+      setError(getApiErrorMessage(e, 'Delete failed.'));
     }
   }
 

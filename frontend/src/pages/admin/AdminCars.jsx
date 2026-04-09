@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/client';
+import { getApiErrorMessage } from '../../api/errors';
 import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
 import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -18,7 +19,7 @@ export function AdminCars() {
       const { data } = await api.get('/cars');
       setCars(data.cars || []);
     } catch (e) {
-      setError(e.response?.data?.message || 'Failed to load cars');
+      setError(getApiErrorMessage(e, 'Failed to load cars.'));
     } finally {
       setLoading(false);
     }
@@ -38,7 +39,7 @@ export function AdminCars() {
       setSeats(4);
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Could not create car');
+      setError(getApiErrorMessage(e, 'Could not create car.'));
     }
   }
 
@@ -48,7 +49,7 @@ export function AdminCars() {
       await api.patch(`/cars/${car._id}`, { isAvailable: !car.isAvailable });
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Update failed');
+      setError(getApiErrorMessage(e, 'Update failed.'));
     }
   }
 
@@ -59,7 +60,7 @@ export function AdminCars() {
       await api.delete(`/cars/${id}`);
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Delete failed');
+      setError(getApiErrorMessage(e, 'Delete failed.'));
     }
   }
 

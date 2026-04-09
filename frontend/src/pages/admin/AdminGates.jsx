@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/client';
+import { getApiErrorMessage } from '../../api/errors';
 import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
 import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -18,7 +19,7 @@ export function AdminGates() {
       const { data } = await api.get('/gates');
       setGates(data.gates || []);
     } catch (e) {
-      setError(e.response?.data?.message || 'Failed to load gates');
+      setError(getApiErrorMessage(e, 'Failed to load gates.'));
     } finally {
       setLoading(false);
     }
@@ -38,12 +39,7 @@ export function AdminGates() {
       setDescription('');
       await load();
     } catch (e) {
-      const msg =
-        e.response?.data?.errors?.[0]?.message ||
-        e.response?.data?.message ||
-        e.message ||
-        'Could not create gate';
-      setError(msg);
+      setError(getApiErrorMessage(e, 'Could not create gate.'));
     }
   }
 
@@ -54,7 +50,7 @@ export function AdminGates() {
       await api.delete(`/gates/${id}`);
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || 'Delete failed');
+      setError(getApiErrorMessage(e, 'Delete failed.'));
     }
   }
 

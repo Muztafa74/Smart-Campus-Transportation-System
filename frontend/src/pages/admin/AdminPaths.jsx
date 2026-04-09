@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../../api/client';
+import { getApiErrorMessage } from '../../api/errors';
 import { EmptyTableRow } from '../../components/ui/EmptyTableRow';
 import { InlineAlert, LoadingState } from '../../components/ui/Feedback';
 import { PageHeader } from '../../components/ui/PageHeader';
@@ -28,7 +29,7 @@ export function AdminPaths() {
       setFromGateId((prev) => (prev && g.some((x) => x._id === prev) ? prev : g[0]?._id || ''));
       setToGateId((prev) => (prev && g.some((x) => x._id === prev) ? prev : g[1]?._id || g[0]?._id || ''));
     } catch (e) {
-      setError(e.response?.data?.message || 'Failed to load data');
+      setError(getApiErrorMessage(e, 'Failed to load gates and routes.'));
     } finally {
       setLoading(false);
     }
@@ -51,7 +52,7 @@ export function AdminPaths() {
       setDigit('');
       await loadAll();
     } catch (e) {
-      setError(e.response?.data?.message || 'Could not create path');
+      setError(getApiErrorMessage(e, 'Could not create path.'));
     }
   }
 
@@ -62,7 +63,7 @@ export function AdminPaths() {
       await api.delete(`/paths/${id}`);
       await loadAll();
     } catch (e) {
-      setError(e.response?.data?.message || 'Delete failed');
+      setError(getApiErrorMessage(e, 'Delete failed.'));
     }
   }
 
@@ -74,7 +75,7 @@ export function AdminPaths() {
       await api.patch(`/paths/${pathId}`, { digit: d });
       await loadAll();
     } catch (e) {
-      setError(e.response?.data?.message || 'Update failed');
+      setError(getApiErrorMessage(e, 'Update failed.'));
     }
   }
 
